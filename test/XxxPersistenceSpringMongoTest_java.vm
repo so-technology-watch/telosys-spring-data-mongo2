@@ -1,0 +1,53 @@
+
+package ${target.javaPackageFromFolder($TEST_SRC)};
+
+import org.demo.persistence.${entity.name}Persistence ;
+import org.demo.persistence.${entity.name}PersistenceGenericTest;
+import org.demo.data.record.${entity.name}Record;
+import org.junit.Test;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.demo.persistence.impl.springMongo.commons.MongoEmbedded;
+import org.demo.persistence.impl.springMongo.commons.SpringMongoTemplate;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import java.util.logging.*;
+
+/**
+ * JUnit tests for Car persistence service
+ * 
+ * @author Telosys Tools
+ *
+ */
+public class ${entity.name}PersistenceSpringMongoTest extends ${entity.name}PersistenceGenericTest {
+	private static final Logger LOGGER = Logger.getLogger(${entity.name}PersistenceSpringMongoTest.class.getName());
+    private ${entity.name}Persistence persistenceService;
+	private MongoTemplate mongoTemplate;
+
+	@BeforeClass
+	public static void startMongoServer() {
+		try {
+			MongoEmbedded.init();
+		} catch (Exception e) {
+			LOGGER.info("error start server");
+		}
+	}
+
+	@Before
+	public void setUp() throws Exception {
+		mongoTemplate = SpringMongoTemplate.getMongotemplate();
+		persistenceService = new ${entity.name}PersistenceSpringMongo(mongoTemplate);
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		mongoTemplate.dropCollection(${entity.name}Record.class);
+	}
+
+	@Test
+	public void testPersistenceService() throws Exception {
+    	testPersistenceService(persistenceService);
+	}
+
+}
+
