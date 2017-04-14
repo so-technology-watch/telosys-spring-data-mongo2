@@ -12,7 +12,7 @@ import $import;
 
 import javax.inject.Named;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -34,11 +34,11 @@ import ${ROOT_PKG}.persistence.${persistenceService};
 public class $springMongoServiceClass implements $persistenceService {
 
 	@Autowired
-	private MongoOperations mongoOps;
+	private MongoTemplate mongoTemplate;
 	private static final Class<${recordClass}> entityClass = ${recordClass}.class;
 
-	public $springMongoServiceClass(MongoOperations mongoOps) {
-		this.mongoOps = mongoOps;
+	public void setMongoTemplate(MongoTemplate mongoTemplate) {
+		this.mongoTemplate = mongoTemplate;
 	}
 
 	//-------------------------------------------------------------------------------------
@@ -86,7 +86,7 @@ public class $springMongoServiceClass implements $persistenceService {
 
 #if( $entity.hasAutoIncrementedKey() )
 	private void inserIncr(${recordClass} record) {
-		SequenceDAO sequenceDAO = new SequenceDAO(mongoOps, "${recordClass}");
+		SequenceDAO sequenceDAO = new SequenceDAO(mongoTemplate, "${recordClass}");
 		do {
 			try {
 				setAutoIncrementedKey(record, sequenceDAO.nextVal("${recordClass}"));
@@ -94,7 +94,7 @@ public class $springMongoServiceClass implements $persistenceService {
 				e.printStackTrace();
 			}
 		} while (exists(record) == true);
-		mongoOps.insert(record);
+		mongoTemplate.insert(record);
 	}
 #end
 	//-------------------------------------------------------------------------------------
@@ -102,7 +102,7 @@ public class $springMongoServiceClass implements $persistenceService {
 	//-------------------------------------------------------------------------------------
 	@Override
 	public long countAll() {
-		return mongoOps.count(new Query(), ${recordClass}.class);
+		return mongoTemplate.count(new Query(), ${recordClass}.class);
 	}
 	
 	@Override
@@ -110,7 +110,7 @@ public class $springMongoServiceClass implements $persistenceService {
 #if( $entity.hasAutoIncrementedKey() )
 		inserIncr(record);
 #else
-		mongoOps.insert(record);
+		mongoTemplate.insert(record);
 #end
 		return record;
 	}
@@ -118,7 +118,7 @@ public class $springMongoServiceClass implements $persistenceService {
 	@Override
 	public boolean delete(${recordClass} record) {
 		Query query = queryForIdentifyBean(record);
-		WriteResult result = mongoOps.remove(query, entityClass);
+		WriteResult result = mongoTemplate.remove(query, entityClass);
 		return result.getN() > 0;
 	}
 
@@ -126,38 +126,38 @@ public class $springMongoServiceClass implements $persistenceService {
 	public boolean deleteById($fn.argumentsListWithWrapperType($keyFields)) {
 		${recordClass} record = newInstanceWithPrimaryKey($fn.argumentsList($keyFields));
 		Query query = queryForIdentifyBean(record);
-		WriteResult result = mongoOps.remove(query, entityClass);
+		WriteResult result = mongoTemplate.remove(query, entityClass);
 		return result.getN() > 0;
 	}
 
 	@Override
 	public boolean exists(${recordClass} record) {
 		Query query = queryForIdentifyBean(record);
-		return mongoOps.exists(query, entityClass);
+		return mongoTemplate.exists(query, entityClass);
 	}
 
 	@Override
 	public boolean exists($fn.argumentsListWithWrapperType($keyFields)) {
 		${recordClass} record = newInstanceWithPrimaryKey($fn.argumentsList($keyFields));
 		Query query = queryForIdentifyBean(record);
-		return mongoOps.exists(query, entityClass);
+		return mongoTemplate.exists(query, entityClass);
 	}
 
 	@Override
 	public List<${recordClass}> findAll() {
-		return mongoOps.findAll(entityClass);
+		return mongoTemplate.findAll(entityClass);
 	}
 
 	@Override
 	public ${recordClass} findById($fn.argumentsListWithWrapperType($keyFields)) {
         ${recordClass} record = newInstanceWithPrimaryKey($fn.argumentsList($keyFields));
 		Query query = queryForIdentifyBean(record);
-		return mongoOps.findOne(query, entityClass);
+		return mongoTemplate.findOne(query, entityClass);
 	}
 
 	@Override
 	public ${recordClass} save(${recordClass} record) {
-		mongoOps.save(record);
+		mongoTemplate.save(record);
 		return record;
 	}
 
@@ -165,7 +165,7 @@ public class $springMongoServiceClass implements $persistenceService {
 	public boolean update(${recordClass} record) {
 		Query query = queryForIdentifyBean(record);
 		Update update = updateQuery(record);
-		WriteResult result = mongoOps.updateFirst(query, update, entityClass);
+		WriteResult result = mongoTemplate.updateFirst(query, update, entityClass);
 		return result.getN() > 0;
 	}
 }

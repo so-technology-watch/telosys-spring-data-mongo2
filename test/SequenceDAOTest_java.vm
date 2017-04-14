@@ -11,9 +11,15 @@ import java.util.logging.Logger;
 
 import org.demo.data.record.AuthorRecord;
 import org.junit.After;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * Spring Mongo Sequence class Integration Test <br>
@@ -21,15 +27,22 @@ import org.springframework.data.mongodb.core.MongoTemplate;
  * @author Telosys 
  *
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = MongoConfig.class)
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class SequenceDAOTest {
 	
+	@Autowired
 	private MongoTemplate mongoTemplate;
 	private static final Logger LOGGER = Logger.getLogger(SequenceDAOTest.class.getName());
-
 	
-	@Before
-	public void setUp() throws Exception {
-		mongoTemplate = SpringMongoTemplate.getMongotemplate();
+	@BeforeClass
+	public static void startMongoServer() {
+		try {
+			MongoEmbedded.init();
+		} catch (Exception e) {
+			LOGGER.info("error start server");
+		}
 	}
 
 	@After
